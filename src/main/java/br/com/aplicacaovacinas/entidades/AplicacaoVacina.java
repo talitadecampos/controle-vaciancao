@@ -12,9 +12,11 @@ public class AplicacaoVacina {
   @GeneratedValue
   private Long idVacinacao;
 
-  @NotEmpty @NotNull
+  @NotEmpty 
+  @NotNull
   private String nomeVacina;
 
+  @NotNull
   @PastOrPresent
   private LocalDate dataAplicacao;
 
