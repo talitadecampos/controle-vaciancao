@@ -1,44 +1,37 @@
-package br.com.aplicacaovacinas.entidades;
+package br.com.aplicacaovacinas.dto;
 
-import org.hibernate.validator.constraints.br.CPF;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.validation.constraints.*;
 import java.time.LocalDate;
 
-@Entity
-public class Usuario {
+import javax.persistence.Column;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 
-	@Id
-	@GeneratedValue
-	private Long id;
+import org.hibernate.validator.constraints.br.CPF;
+
+
+public class CadastroUsuarioDTO {
 
 	@NotEmpty
 	@NotNull
 	private String nome;
 
 	@Email
-	@NotEmpty
 	@Column(unique = true)
+	@NotNull
+	@NotEmpty
 	private String email;
 
 	@CPF
+	@NotNull
+	@NotEmpty
 	@Column(unique = true)
 	private String cpf;
 
 	@Past
 	@NotNull
 	private LocalDate dataNascto;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getNome() {
 		return nome;
@@ -64,11 +57,16 @@ public class Usuario {
 		this.cpf = cpf;
 	}
 
-	public @Past @NotNull LocalDate getDataNascto() {
+	public LocalDate getDataNascto() {
 		return dataNascto;
 	}
 
-	public void setDataNascto(@Past @NotNull @Past @NotNull LocalDate dataNascto) {
+	public void setDataNascto(LocalDate dataNascto) {
 		this.dataNascto = dataNascto;
 	}
+
+	
+	
+	
+	
 }

@@ -1,68 +1,52 @@
 package br.com.aplicacaovacinas.controller;
 
-import br.com.aplicacaovacinas.repositorio.UsuarioRepository;
-import br.com.aplicacaovacinas.dto.CadastroUsuarioDTO;
-import br.com.aplicacaovacinas.entidades.Usuario;
+import java.net.URI;
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.validation.Valid;
-import java.net.URI;
-
+import br.com.aplicacaovacinas.dto.CadastroUsuarioDTO;
+import br.com.aplicacaovacinas.entidades.Usuario;
+import br.com.aplicacaovacinas.service.UsuarioService;
 
 @RestController
 public class UsuarioController {
 
-  @Autowired
-  UsuarioRepository repositorio;
+	@Autowired
+	UsuarioService servico;
 
-  @PostMapping("/usuarios")
-  public ResponseEntity<CadastroUsuarioDTO> cadastrarUsuario(@RequestBody @Valid Usuario novoUsuario, UriComponentsBuilder uriBuilder) {
-    repositorio.save(novoUsuario);
+	@PostMapping("/usuarios")
+	public ResponseEntity<CadastroUsuarioDTO> cadastrarUsuario(@RequestBody @Valid CadastroUsuarioDTO novoUsuario,
+			UriComponentsBuilder uriBuilder) {
 
-    URI uri = uriBuilder.path("/usuarios/{id}").buildAndExpand(novoUsuario.getId()).toUri();
+		Usuario usuario = servico.salvarUsuario(novoUsuario);
+		
 
-    CadastroUsuarioDTO usuarioNovoCadastro = new CadastroUsuarioDTO();
-    usuarioNovoCadastro.setCpf(novoUsuario.getCpf());
-    usuarioNovoCadastro.setDataNascto(novoUsuario.getDataNascto());
-    usuarioNovoCadastro.setEmail(novoUsuario.getEmail());
-    usuarioNovoCadastro.setNome(novoUsuario.getNome());
-  
-    
-    return ResponseEntity.created(uri).body(usuarioNovoCadastro);
-  }
+		URI uri = uriBuilder.path("/usuarios/{id}").buildAndExpand(usuario.getId()).toUri();
 
-  @PutMapping("/usuarios/{idUsuario}")
-  public ResponseEntity<Usuario> alterarUsuario(@PathVariable(value="idUsuario") Long idUsuario, @RequestBody @Valid Usuario usuarioAlterado, UriComponentsBuilder uriBuilder) {
-    Usuario usuarioAtual = repositorio.getOne(idUsuario);
+		
+		return ResponseEntity.created(uri).body(novoUsuario);
+	}
 
-    usuarioAtual.setCpf(usuarioAlterado.getCpf());
-    usuarioAtual.setDataNascto(usuarioAlterado.getDataNascto());
-    usuarioAtual.setEmail(usuarioAlterado.getEmail());
-    usuarioAtual.setNome(usuarioAlterado.getNome());
+	@PutMapping("/usuarios")
+	public ResponseEntity<CadastroUsuarioDTO> alterarUsuario(@RequestBody @Valid CadastroUsuarioDTO usuarioAlterado, UriComponentsBuilder uriBuilder) {
+		servico.alterarUsuario(usuarioAlterado);
+		
+		return ResponseEntity.ok(usuarioAlterado);
+	}
 
-    usuarioAlterado = repositorio.save(usuarioAtual);
-
-    return ResponseEntity.ok(usuarioAlterado);
-  }
-  
-  @ExceptionHandler(DataIntegrityViolationException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseEntity<String> tratarErroCadastro(DataIntegrityViolationException exception) {
-	  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Dados Inválidos: " + exception.getMessage());
-	  
-  }
-  
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseEntity<String> tratarCampoVazio(MethodArgumentNotValidException exception) {
-	  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Dados Inválidos: " + exception.getMessage());
-  }
+	
 
 }
-
